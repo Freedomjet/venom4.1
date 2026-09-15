@@ -5,29 +5,67 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>ps4 jailbreak</title>
 <style>
-  html, body { margin:0; padding:0; background:#0b0d10; color:#c8ced8;
-               font:15px/1.45 "Segoe UI", system-ui, sans-serif; }
-  #wrap { padding:16px 18px; }
-  #state { font-size:22px; font-weight:700; margin:0 0 6px; }
-  #det { font-size:13px; color:#8b95a3; margin:0 0 4px; }
-  #det b { color:#c8ced8; font-weight:600; }
-  #cache { font-size:12px; color:#5c6672; margin:0 0 10px; min-height:14px; }
-  #cache.cacheok { color:#7fd0a0; }
-  .ok { color:#7fd0a0; } .bad { color:#d08a7f; } .warn { color:#d8c07f; }
-  #brand { text-align:center; padding:8px 10px; background:#0e1116;
-           border-bottom:1px solid #1e2732; }
-  #brand img { width:28px; height:28px; margin-right:8px; border-radius:50%;
-               vertical-align:middle; }
-  #brand b { font-size:15px; font-weight:700; letter-spacing:.14em;
-             color:#e6ebf2; vertical-align:middle; }
+  html, body {
+    margin: 0;
+    padding: 0;
+    background: #000000;
+    color: #ffffff;
+    font: 14px/1.5 "Segoe UI", system-ui, sans-serif;
+    text-transform: lowercase;
+  }
+  #container {
+    max-width: 480px;
+    margin: 80px auto;
+    padding: 24px;
+  }
+  #brand {
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: .2em;
+    margin-bottom: 32px;
+    opacity: 0.5;
+  }
+  #wrap {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  #state {
+    font-size: 20px;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+  }
+  #det {
+    font-size: 13px;
+    opacity: 0.6;
+  }
+  #det b {
+    color: #ffffff;
+    font-weight: 600;
+    opacity: 1;
+  }
+  #cache {
+    font-size: 12px;
+    opacity: 0.4;
+    margin-top: 4px;
+    min-height: 16px;
+  }
+  #cache.cacheok {
+    opacity: 0.8;
+  }
+  .ok { color: #ffffff; }
+  .bad { color: #ffffff; text-decoration: underline; }
+  .warn { color: #ffffff; }
 </style>
 </head>
 <body>
-<div id="brand"><img src="logo_raw.png" alt="" width="28" height="28"><b>RAW GAME</b></div>
-<div id="wrap">
-  <div id="state">detecting firmware...</div>
-  <div id="det"></div>
-  <div id="cache"></div>
+<div id="container">
+  <div id="brand">mansoor0x</div>
+  <div id="wrap">
+    <div id="state">detecting firmware...</div>
+    <div id="det"></div>
+    <div id="cache"></div>
+  </div>
 </div>
 
 <script>
@@ -35,8 +73,8 @@
     var stateEl = document.getElementById("state");
     var detEl = document.getElementById("det");
     var cacheEl = document.getElementById("cache");
-    function setState(t, c) { stateEl.textContent = t; stateEl.className = c || ""; }
-    function setCache(t, ok) { cacheEl.textContent = t; cacheEl.className = ok ? "cacheok" : ""; }
+    function setState(t, c) { stateEl.textContent = t.toLowerCase(); stateEl.className = c || ""; }
+    function setCache(t, ok) { cacheEl.textContent = t.toLowerCase(); cacheEl.className = ok ? "cacheok" : ""; }
     var params = new URLSearchParams(location.search);
 
     var key = null, fwnum = null;
@@ -53,7 +91,7 @@
     if (forced === "lapse" || forced === "poops") {
         bug = forced; why = "forced via ?bug=" + forced;
     } else if (!key) {
-        why = "user-agent is not a PlayStation 4";
+        why = "user-agent is not a playstation 4";
     } else if (fwnum <= 1202) {
         bug = "lapse"; why = key + " <= 12.02";
     } else if (fwnum >= 1250) {
@@ -64,9 +102,9 @@
     detEl.innerHTML = "firmware <b>" + (key || "unknown") + "</b>"
         + " &middot; bug <b>" + (bug || "none") + "</b> &middot; " + why;
 
-    if (!bug) { setState("UNSUPPORTED FIRMWARE", "bad"); return; }
+    if (!bug) { setState("unsupported firmware", "bad"); return; }
 
-    var target = (bug === "lapse" ? "run_lapse.html" : "run_poops.html")
+    var target = (bug === "lapse" ? "lapse.html" : "poops.html")
         + location.search;
     function go() { setState("loading " + bug + " chain...", "warn");
                     location.replace(target); }
@@ -94,7 +132,7 @@
     } else if (ac.status === ac.UPDATEREADY) {
         try { ac.swapCache(); } catch (e) {}
         setCache("update downloaded", true);
-        waitForTap("UPDATE READY -- press X or tap to reload & run",
+        waitForTap("update ready -- press x or tap to reload & run",
                    function () { location.reload(); });
     } else {
         setCache("checking cache...");
@@ -107,12 +145,12 @@
 
         ac.addEventListener("cached", function () {
             setCache("cached for offline use", true);
-            waitForTap("CACHED (first run) -- press X or tap to run", go);
+            waitForTap("cached (first run) -- press x or tap to run", go);
         }, false);
         ac.addEventListener("updateready", function () {
             try { ac.swapCache(); } catch (e) {}
             setCache("update downloaded", true);
-            waitForTap("UPDATE READY -- press X or tap to reload & run",
+            waitForTap("update ready -- press x or tap to reload & run",
                        function () { location.reload(); });
         }, false);
 
@@ -122,11 +160,11 @@
         }, false);
         ac.addEventListener("error", function () {
             setCache("cache unavailable");
-            waitForTap("CACHE FAILED -- press X or tap to run anyway", go);
+            waitForTap("cache failed -- press x or tap to run anyway", go);
         }, false);
         ac.addEventListener("obsolete", function () {
             setCache("cache obsolete");
-            waitForTap("CACHE OBSOLETE -- press X or tap to run", go);
+            waitForTap("cache obsolete -- press x or tap to run", go);
         }, false);
     }
 })();
