@@ -104,7 +104,7 @@
 
     if (!bug) { setState("unsupported firmware", "bad"); return; }
 
-    var target = (bug === "lapse" ? "lapse.html" : "poops.html")
+    var target = (bug === "lapse" ? "run_lapse.html" : "run_poops.html")
         + location.search;
     function go() { setState("loading " + bug + " chain...", "warn");
                     location.replace(target); }
