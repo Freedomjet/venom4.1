@@ -2,8 +2,8 @@ CACHE MANIFEST
 # build venom4.1
 
 index.html
-lapse.html
-poops.html
+run_lapse.html
+run_poops.html
 chain_lapse.js
 chain_poops.js
 core.js
